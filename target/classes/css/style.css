@@ -1,0 +1,221 @@
+/* SyncTalk Global Styles */
+
+.root {
+    -fx-font-family: 'Segoe UI', 'System', sans-serif;
+    -fx-background-color: #f0f2f5;
+}
+
+/* Auth screens (Login/Register) */
+.auth-panel {
+    -fx-background-color: white;
+    -fx-background-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 20, 0, 0, 4);
+    -fx-padding: 30px;
+    -fx-spacing: 15px;
+    -fx-max-width: 400px;
+}
+
+.app-title {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1877f2;
+}
+
+.sub-title {
+    -fx-font-size: 16px;
+    -fx-text-fill: #65676b;
+}
+
+.input-field {
+    -fx-background-color: #f0f2f5;
+    -fx-background-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8px;
+    -fx-padding: 10px 15px;
+    -fx-font-size: 14px;
+}
+
+.input-field:focused {
+    -fx-background-color: white;
+    -fx-border-color: #1877f2;
+    -fx-border-width: 2px;
+}
+
+.btn-primary {
+    -fx-background-color: #1877f2;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #166fe5;
+}
+
+.btn-success {
+    -fx-background-color: #42b72a;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+
+.btn-success:hover {
+    -fx-background-color: #3ba325;
+}
+
+.btn-danger {
+    -fx-background-color: #e4405f;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+
+.btn-danger:hover {
+    -fx-background-color: #d63350;
+}
+
+.btn-warning {
+    -fx-background-color: #ff9800;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+
+.btn-warning:hover {
+    -fx-background-color: #f08800;
+}
+
+.btn-secondary {
+    -fx-background-color: #65676b;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+
+.btn-secondary:hover {
+    -fx-background-color: #55575b;
+}
+
+/* Header bar */
+.header-bar {
+    -fx-background-color: #1877f2;
+    -fx-padding: 12px 20px;
+    -fx-background-radius: 0 0 10px 10px;
+}
+
+.header-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.header-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(255,255,255,0.8);
+}
+
+/* ListView styling */
+.list-view {
+    -fx-background-color: white;
+    -fx-background-radius: 10px;
+    -fx-border-color: #e4e6eb;
+    -fx-border-radius: 10px;
+    -fx-padding: 0;
+}
+
+.list-view .list-cell {
+    -fx-padding: 10px 15px;
+    -fx-background-color: white;
+    -fx-border-color: #f0f2f5;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.list-view .list-cell:filled:hover {
+    -fx-background-color: #f0f2f5;
+}
+
+.list-view .list-cell:filled:selected {
+    -fx-background-color: #e7f3ff;
+}
+
+/* ScrollPane */
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Chat bubbles */
+.bubble-sent {
+    -fx-background-color: #1877f2;
+    -fx-background-radius: 18px 18px 4px 18px;
+    -fx-padding: 8px 14px;
+}
+
+.bubble-received {
+    -fx-background-color: white;
+    -fx-background-radius: 18px 18px 18px 4px;
+    -fx-padding: 8px 14px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 2, 0, 0, 1);
+}
+
+.bubble-text {
+    -fx-font-size: 14px;
+}
+
+.bubble-time {
+    -fx-font-size: 10px;
+    -fx-text-fill: rgba(0,0,0,0.4);
+}
+
+.bubble-name {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1877f2;
+}
+
+/* Chat input area */
+.chat-input {
+    -fx-background-color: white;
+    -fx-background-radius: 20px;
+    -fx-border-color: #e4e6eb;
+    -fx-border-radius: 20px;
+    -fx-padding: 10px 18px;
+    -fx-font-size: 14px;
+}
+
+.chat-input:focused {
+    -fx-border-color: #1877f2;
+    -fx-border-width: 2px;
+}
+
+.footer-text {
+    -fx-font-size: 11px;
+    -fx-text-fill: #999;
+    -fx-alignment: center;
+}
+
+.section-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #65676b;
+    -fx-padding: 5px 0;
+}
