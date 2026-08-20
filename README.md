@@ -7,7 +7,7 @@ into the conversation.
 
 ## Live demo
 
-**[sync-talk.onrender.com](https://sync-talk.onrender.com/)**
+**[try-sync-talk.onrender.com](https://try-sync-talk.onrender.com/)**
 
 Two personas, `john` / `emily` — one click on the landing page logs you
 straight in with credentials pre-filled. Open a second tab (or send the
