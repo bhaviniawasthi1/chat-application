@@ -36,7 +36,7 @@
     </div>
 
     <form class="composer" id="composerForm">
-        <input type="text" id="messageInput" placeholder="Say something…" autocomplete="off" maxlength="1000">
+        <textarea id="messageInput" placeholder="Say something…" autocomplete="off" maxlength="1000" rows="1"></textarea>
         <button type="submit" class="btn btn-primary">Send</button>
     </form>
 </div>
@@ -114,16 +114,13 @@
             bubble.appendChild(quote);
         }
 
-        const senderLabel = document.createElement('span');
-        senderLabel.className = 'sender';
-        senderLabel.textContent = msg.senderDisplayName;
         const content = document.createElement('div');
+        content.className = 'msg-text';
         content.textContent = msg.content;
         const time = document.createElement('span');
         time.className = 'timestamp';
         time.textContent = formatTime(msg.timestamp);
 
-        bubble.appendChild(senderLabel);
         bubble.appendChild(content);
         bubble.appendChild(time);
 
@@ -189,9 +186,17 @@
         statusLine.textContent = 'connection lost — refresh to reconnect';
     });
 
+    const MAX_INPUT_HEIGHT = 120;
+    function resizeInput() {
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, MAX_INPUT_HEIGHT) + 'px';
+    }
+    resizeInput();
+
     let lastTypingSent = 0;
     let stopTypingHandle = null;
     input.addEventListener('input', () => {
+        resizeInput();
         const now = Date.now();
         if (now - lastTypingSent > 1500) {
             stompClient.send('/app/chat.typing', {}, JSON.stringify({typing: true}));
@@ -204,8 +209,15 @@
         }, 2000);
     });
 
-    form.addEventListener('submit', e => {
-        e.preventDefault();
+    // Enter sends the message; Shift+Enter (or just typing) drops to a new line.
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    function sendMessage() {
         const text = input.value.trim();
         if (!text) return;
         stompClient.send('/app/chat.send', {}, JSON.stringify({
@@ -213,8 +225,14 @@
             replyToId: replyingTo ? replyingTo.id : null
         }));
         input.value = '';
+        resizeInput();
         setReplyTarget(null);
         stompClient.send('/app/chat.typing', {}, JSON.stringify({typing: false}));
+    }
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        sendMessage();
     });
 </script>
 </body>

@@ -148,16 +148,26 @@ footer {
     text-align: center;
     color: var(--muted);
     font-size: 0.85rem;
-    padding: 30px 0 10px;
+    padding: 24px 0 10px;
+}
+
+.footer-line { margin: 2px 0; }
+
+.footer-credit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
 .gh-link {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
     color: var(--muted);
     text-decoration: none;
-    padding: 4px 10px;
+    width: 22px;
+    height: 22px;
     border-radius: 999px;
     border: 1px solid rgba(255,255,255,0.1);
     transition: color 0.15s ease, border-color 0.15s ease;
@@ -311,7 +321,7 @@ footer {
 }
 .reply-preview button:hover { color: var(--text); }
 
-.bubble .sender { display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 3px; }
+.bubble .msg-text { white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; }
 .bubble .timestamp { display: block; font-size: 0.68rem; opacity: 0.7; margin-top: 4px; text-align: right; }
 
 .bubble.me {
@@ -329,12 +339,13 @@ footer {
 
 .composer {
     display: flex;
+    align-items: flex-end;
     gap: 10px;
     padding-top: 12px;
     border-top: 1px solid rgba(255,255,255,0.08);
 }
 
-.composer input {
+.composer textarea {
     flex: 1;
     padding: 12px 14px;
     border-radius: 10px;
@@ -342,9 +353,19 @@ footer {
     background: rgba(0,0,0,0.25);
     color: var(--text);
     font-size: 0.95rem;
+    font-family: inherit;
+    resize: none;
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
-.composer input:focus { outline: 2px solid var(--accent); }
+.composer textarea:focus { outline: 2px solid var(--accent); }
+
+.composer .btn { flex-shrink: 0; }
 
 .status-line {
     text-align: center;
