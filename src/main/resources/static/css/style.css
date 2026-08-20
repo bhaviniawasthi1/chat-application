@@ -268,11 +268,15 @@ footer {
 #messages {
     flex: 1;
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     padding: 16px 4px;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
+
+#messages::-webkit-scrollbar { display: none; }
 
 .bubble {
     max-width: 75%;
@@ -357,11 +361,15 @@ footer {
     resize: none;
     max-height: 120px;
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     line-height: 1.4;
     white-space: pre-wrap;
     word-break: break-word;
     overflow-wrap: anywhere;
 }
+
+.composer textarea::-webkit-scrollbar { display: none; }
 
 .composer textarea:focus { outline: 2px solid var(--accent); }
 
