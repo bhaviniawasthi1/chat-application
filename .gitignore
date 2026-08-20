@@ -10,3 +10,10 @@ target/
 Thumbs.db
 *.log
 .env
+
+# Source favicon dropped at repo root — the app uses the copies under
+# src/main/resources/static/ instead.
+/synctalk_favicon.png
+
+# Local cleanup staging folder — not part of the project.
+/_to_delete/
