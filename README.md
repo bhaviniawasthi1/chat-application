@@ -1,99 +1,80 @@
 # SyncTalk
 
-A real-time chat application with user authentication, private messaging, and group chat features.
+A real-time, two-seat chat demo. There are exactly two accounts, ever — grab
+one, send the link to a friend, and have them grab the other. Log out and
+your seat opens up for the next pair of visitors.
 
-## Features
+## Live demo
 
-- **User Authentication** — Register and login with username/password
-- **Private Chat** — Real-time one-on-one messaging with message history
-- **Group Chat** — Create groups, add members, and have group conversations
-- **Message History** — All messages stored and loaded from MySQL database
-- **Real-time Updates** — Instant message delivery via Java Socket threads
+Two accounts, `alex` / `sam` — credentials are shown right on the landing
+page. Pick one, share the link, and chat with whoever grabs the other seat.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | JavaFX (FXML, CSS) |
-| Backend | Java Sockets (ServerSocket) |
-| Database | MySQL |
+| Backend | Spring Boot (Web, Security, WebSocket, Data JPA) |
+| Real-time transport | WebSocket via STOMP/SockJS |
+| Database | H2, in-memory, reset on every restart |
+| Frontend | Thymeleaf + plain HTML/CSS/JS |
 | Build | Maven |
-| Serialization | JSON (Gson) |
+| Deploy | Docker / Render |
 
-## Prerequisites
+## Why H2 and why it resets
 
-- Java 17+
-- Maven 3.6+
-- MySQL 8.0+
+This is a portfolio project, not a product — there's no real user data to
+protect, so keeping a persistent database around would just be overhead.
+`spring.jpa.hibernate.ddl-auto=create` rebuilds the schema from scratch on
+every boot, and a `DataInitializer` reseeds the two demo accounts and wipes
+chat history at the same time. Restarting the server (including Render's
+free-tier sleep/wake cycle) gives everyone a clean slate.
 
-## Setup
+## The "in use" seat lock
 
-### 1. Database
+Only two accounts exist, so only two people can ever be in the app at once.
+The moment someone logs into `alex` or `sam`, that account is marked in use
+and a third login attempt on it is rejected (via Spring Security's account
+"locked" check) until the current occupant logs out, which frees the seat
+immediately.
 
-Create the database and tables:
+## Local setup
 
-```sql
-CREATE DATABASE IF NOT EXISTS synctalk;
-USE synctalk;
--- then run database/schema.sql
-```
-
-### 2. Configuration
-
-Open `src/main/java/server/DatabaseManager.java` and update the MySQL credentials:
-
-```java
-private static final String USER = "root";     // your MySQL username
-private static final String PASSWORD = "root"; // your MySQL password
-```
-
-### 3. Run the Server
+Requires Java 17+ and Maven 3.6+. No external database to install — H2 runs
+in-memory.
 
 ```bash
-mvn clean compile exec:java
+mvn spring-boot:run
 ```
 
-The server starts on port `8080`.
+Open `http://localhost:8080` in two separate browser windows (or one normal
++ one incognito) to log in as both `alex` and `sam` and chat with yourself.
 
-### 4. Run the Client
-
-Open a separate terminal:
-
-```bash
-mvn javafx:run
-```
-
-Launch multiple client instances to test messaging between users.
-
-## Usage
-
-1. **Register** — Create a new account with username, password, and display name
-2. **Login** — Sign in with your credentials
-3. **Private Chat** — Double-click any user in the online users list
-4. **Group Chat** — Click "+ New Group", select members, then double-click the group
-5. **Refresh** — Click the Refresh button to reload users and groups
-
-## Project Structure
+## Project structure
 
 ```
 SyncTalk/
-├── database/schema.sql
+├── Dockerfile
+├── render.yaml
 ├── pom.xml
-├── src/main/java/
-│   ├── server/
-│   │   ├── SyncTalkServer.java       # Entry point, accepts client connections
-│   │   ├── ClientHandler.java        # Per-client thread, handles JSON messages
-│   │   └── DatabaseManager.java      # MySQL connection and queries
-│   └── client/
-│       ├── SyncTalkClient.java       # JavaFX application entry, page navigation
-│       ├── ServerConnection.java     # Socket connection with event dispatch
-│       ├── LoginController.java
-│       ├── RegisterController.java
-│       ├── MainController.java       # Dashboard with user/group lists
-│       ├── ChatController.java       # Private chat view
-│       ├── GroupChatController.java  # Group chat view
-│       └── CreateGroupController.java
-└── src/main/resources/
-    ├── css/style.css
-    └── fxml/*.fxml
+└── src/main/
+    ├── java/com/synctalk/
+    │   ├── SyncTalkApplication.java
+    │   ├── config/          # WebSocket config, demo account seeding
+    │   ├── controller/      # Page routes + chat WebSocket handling
+    │   ├── model/           # User, ChatMessage JPA entities
+    │   ├── repository/      # Spring Data repositories
+    │   └── security/        # Spring Security config + seat locking
+    └── resources/
+        ├── templates/       # landing.html, login.html, chat.html
+        ├── static/css/
+        └── application.properties
 ```
+
+## Deploying on Render
+
+1. Push this repo to GitHub.
+2. On Render, create a new **Web Service** from the repo, runtime **Docker**
+   (Render will pick up `render.yaml` and `Dockerfile` automatically).
+3. No database service needed — H2 is in-memory.
+4. Deploy. Every restart gives a fresh set of demo accounts and empty chat
+   history.

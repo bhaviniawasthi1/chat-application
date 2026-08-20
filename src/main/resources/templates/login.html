@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in — SyncTalk</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+<div class="wrap">
+    <div class="auth-card">
+        <div class="brand"><span class="dot"></span> SyncTalk</div>
+        <h2>Take your seat</h2>
+
+        <div class="msg error" th:if="${param.error}">
+            That account is either taken right now or the password's off — check the demo credentials on the
+            landing page and try again.
+        </div>
+        <div class="msg info" th:if="${param.loggedout}">
+            You've left the chat — your seat is free for the next person.
+        </div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="field">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" th:value="${prefillUser}" autocomplete="username" required>
+            </div>
+            <div class="field">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Log in</button>
+        </form>
+
+        <a class="back-link" th:href="@{/}">&larr; back to demo accounts</a>
+    </div>
+</div>
+</body>
+</html>

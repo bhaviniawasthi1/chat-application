@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: synctalk-chat
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DDL_AUTO
+        value: create
+      - key: THYMELEAF_CACHE
+        value: "true"
+      - key: H2_CONSOLE
+        value: "false"
+
+# No database service needed — SyncTalk runs on an in-memory H2 database.
+# Every time this web service restarts (including Render's free-tier
+# sleep/wake cycle), the schema is recreated from scratch and the two
+# shared demo accounts (alex / sam) are reseeded with empty chat history.
+# Nothing persists between restarts by design — that's what makes it safe
+# to leave as a public live demo.

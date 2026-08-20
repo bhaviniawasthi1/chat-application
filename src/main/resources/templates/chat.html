@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyncTalk — chat</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+<div class="chat-shell">
+    <div class="chat-header">
+        <div class="who">
+            <span th:text="${displayName}">Alex</span>
+            <span class="muted">is in the room</span>
+        </div>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn">Log out &amp; free seat</button>
+        </form>
+    </div>
+
+    <div id="messages"></div>
+    <div class="status-line" id="statusLine">connecting…</div>
+
+    <form class="composer" id="composerForm">
+        <input type="text" id="messageInput" placeholder="Say something…" autocomplete="off" maxlength="1000">
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script th:inline="javascript">
+    const me = /*[[${username}]]*/ 'alex';
+    const messagesEl = document.getElementById('messages');
+    const statusLine = document.getElementById('statusLine');
+    const form = document.getElementById('composerForm');
+    const input = document.getElementById('messageInput');
+
+    function renderMessage(msg) {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble ' + (msg.senderUsername === me ? 'me' : 'them');
+        const senderLabel = document.createElement('span');
+        senderLabel.className = 'sender';
+        senderLabel.textContent = msg.senderDisplayName;
+        const content = document.createElement('div');
+        content.textContent = msg.content;
+        bubble.appendChild(senderLabel);
+        bubble.appendChild(content);
+        messagesEl.appendChild(bubble);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    fetch('/api/messages')
+        .then(r => r.json())
+        .then(history => history.forEach(renderMessage))
+        .catch(() => {});
+
+    const socket = new SockJS('/ws');
+    const stompClient = Stomp.over(socket);
+    stompClient.debug = null;
+
+    stompClient.connect({}, () => {
+        statusLine.textContent = 'connected — messages send instantly';
+        stompClient.subscribe('/topic/chat', frame => {
+            renderMessage(JSON.parse(frame.body));
+        });
+    }, () => {
+        statusLine.textContent = 'connection lost — refresh to reconnect';
+    });
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        stompClient.send('/app/chat.send', {}, JSON.stringify({content: text}));
+        input.value = '';
+    });
+</script>
+</body>
+</html>
