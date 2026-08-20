@@ -24,6 +24,15 @@ public class ChatMessage {
     @Column(nullable = false)
     private LocalDateTime timestamp = LocalDateTime.now();
 
+    /** Set when this message is a reply to an earlier one; the sender/snippet are
+     *  snapshotted at send time so history rendering never needs a second lookup. */
+    private Long replyToId;
+
+    private String replyToSenderDisplayName;
+
+    @Column(length = 200)
+    private String replyToContent;
+
     public ChatMessage() {
     }
 
@@ -51,5 +60,29 @@ public class ChatMessage {
 
     public LocalDateTime getTimestamp() {
         return timestamp;
+    }
+
+    public Long getReplyToId() {
+        return replyToId;
+    }
+
+    public void setReplyToId(Long replyToId) {
+        this.replyToId = replyToId;
+    }
+
+    public String getReplyToSenderDisplayName() {
+        return replyToSenderDisplayName;
+    }
+
+    public void setReplyToSenderDisplayName(String replyToSenderDisplayName) {
+        this.replyToSenderDisplayName = replyToSenderDisplayName;
+    }
+
+    public String getReplyToContent() {
+        return replyToContent;
+    }
+
+    public void setReplyToContent(String replyToContent) {
+        this.replyToContent = replyToContent;
     }
 }

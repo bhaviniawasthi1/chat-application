@@ -22,7 +22,8 @@ public class PageController {
         this.userRepository = userRepository;
     }
 
-    public record AccountView(String username, String rawPassword, String displayName, String avatarEmoji, boolean inUse) {
+    public record AccountView(String username, String rawPassword, String displayName, String initials,
+                               String avatarUrl, boolean inUse) {
     }
 
     @GetMapping("/")
@@ -33,7 +34,7 @@ public class PageController {
                             .map(User::isInUse)
                             .orElse(false);
                     return new AccountView(account.username(), account.rawPassword(), account.displayName(),
-                            account.avatarEmoji(), inUse);
+                            account.initials(), account.avatarUrl(), inUse);
                 })
                 .toList();
         model.addAttribute("accounts", views);
@@ -51,18 +52,20 @@ public class PageController {
 
     @GetMapping("/chat")
     public String chat(@AuthenticationPrincipal User user, Model model) {
-        model.addAttribute("displayName", user.getDisplayName());
-        model.addAttribute("username", user.getUsername());
-
-        String myAvatar = DemoAccounts.byUsername(user.getUsername())
-                .map(DemoAccounts.Account::avatarEmoji).orElse("🙂");
+        DemoAccounts.Account me = DemoAccounts.byUsername(user.getUsername()).orElse(null);
         DemoAccounts.Account other = DemoAccounts.ALL.stream()
                 .filter(a -> !a.username().equals(user.getUsername()))
                 .findFirst().orElse(null);
 
-        model.addAttribute("myAvatar", myAvatar);
+        model.addAttribute("username", user.getUsername());
+        model.addAttribute("displayName", user.getDisplayName());
+        model.addAttribute("myAvatar", me == null ? "" : me.avatarUrl());
+        model.addAttribute("myInitials", me == null ? "?" : me.initials());
+
+        model.addAttribute("otherUsername", other == null ? "" : other.username());
         model.addAttribute("otherName", other == null ? "the other seat" : other.displayName());
-        model.addAttribute("otherAvatar", other == null ? "🙂" : other.avatarEmoji());
+        model.addAttribute("otherAvatar", other == null ? "" : other.avatarUrl());
+        model.addAttribute("otherInitials", other == null ? "?" : other.initials());
         return "chat";
     }
 

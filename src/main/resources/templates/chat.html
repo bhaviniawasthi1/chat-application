@@ -10,17 +10,30 @@
 <div class="chat-shell">
     <div class="chat-header">
         <div class="who">
-            <span th:text="${myAvatar}">🙂</span>
-            <span th:text="${displayName}">Ada</span>
-            <span class="muted" th:text="'chatting with ' + ${otherAvatar} + ' ' + ${otherName}">chatting with Turing</span>
+            <img class="avatar-sm" th:src="@{${otherAvatar}}" th:alt="${otherName}">
+            <div>
+                <div class="contact-name" th:text="${otherName}">Emily</div>
+                <div class="contact-status" id="otherStatus">offline</div>
+            </div>
         </div>
-        <form th:action="@{/logout}" method="post">
-            <button type="submit" class="logout-btn">Log out</button>
-        </form>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <img class="avatar-sm" th:src="@{${myAvatar}}" th:alt="${displayName}" th:title="'You: ' + ${displayName}">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="logout-btn">Log out</button>
+            </form>
+        </div>
     </div>
 
     <div id="messages"></div>
     <div class="status-line" id="statusLine">connecting…</div>
+
+    <div class="reply-preview" id="replyPreview" style="display:none;">
+        <div class="reply-preview-body">
+            <div class="reply-preview-sender" id="replyPreviewSender"></div>
+            <div class="reply-preview-text" id="replyPreviewText"></div>
+        </div>
+        <button type="button" id="replyPreviewCancel" aria-label="Cancel reply">&times;</button>
+    </div>
 
     <form class="composer" id="composerForm">
         <input type="text" id="messageInput" placeholder="Say something…" autocomplete="off" maxlength="1000">
@@ -31,11 +44,22 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script th:inline="javascript">
-    const me = /*[[${username}]]*/ 'ada';
+    const me = /*[[${username}]]*/ 'john';
+    const otherUsername = /*[[${otherUsername}]]*/ 'emily';
     const messagesEl = document.getElementById('messages');
     const statusLine = document.getElementById('statusLine');
+    const otherStatusEl = document.getElementById('otherStatus');
     const form = document.getElementById('composerForm');
     const input = document.getElementById('messageInput');
+    const replyPreview = document.getElementById('replyPreview');
+    const replyPreviewSender = document.getElementById('replyPreviewSender');
+    const replyPreviewText = document.getElementById('replyPreviewText');
+    const replyPreviewCancel = document.getElementById('replyPreviewCancel');
+
+    let otherOnline = false;
+    let typingTimeoutHandle = null;
+    let replyingTo = null; // {id, sender, text}
+    const messagesById = new Map();
 
     function formatTime(iso) {
         try {
@@ -45,9 +69,51 @@
         } catch (e) { return ''; }
     }
 
+    function setOtherStatus(text, isTyping) {
+        otherStatusEl.textContent = text;
+        otherStatusEl.classList.toggle('typing', !!isTyping);
+    }
+
+    function refreshOtherStatusFromPresence() {
+        setOtherStatus(otherOnline ? 'online' : 'offline', false);
+    }
+
+    function setReplyTarget(msg) {
+        if (!msg) {
+            replyingTo = null;
+            replyPreview.style.display = 'none';
+            return;
+        }
+        replyingTo = {id: msg.id, sender: msg.senderDisplayName, text: msg.content};
+        replyPreviewSender.textContent = msg.senderDisplayName;
+        replyPreviewText.textContent = msg.content;
+        replyPreview.style.display = 'flex';
+        input.focus();
+    }
+
+    replyPreviewCancel.addEventListener('click', () => setReplyTarget(null));
+
     function renderMessage(msg) {
+        if (msg.id != null) {
+            messagesById.set(msg.id, msg);
+        }
         const bubble = document.createElement('div');
         bubble.className = 'bubble ' + (msg.senderUsername === me ? 'me' : 'them');
+        bubble.title = 'Click to reply';
+
+        if (msg.replyToContent) {
+            const quote = document.createElement('div');
+            quote.className = 'reply-quote';
+            const quoteSender = document.createElement('div');
+            quoteSender.className = 'reply-quote-sender';
+            quoteSender.textContent = msg.replyToSenderDisplayName || '';
+            const quoteText = document.createElement('div');
+            quoteText.textContent = msg.replyToContent;
+            quote.appendChild(quoteSender);
+            quote.appendChild(quoteText);
+            bubble.appendChild(quote);
+        }
+
         const senderLabel = document.createElement('span');
         senderLabel.className = 'sender';
         senderLabel.textContent = msg.senderDisplayName;
@@ -56,9 +122,13 @@
         const time = document.createElement('span');
         time.className = 'timestamp';
         time.textContent = formatTime(msg.timestamp);
+
         bubble.appendChild(senderLabel);
         bubble.appendChild(content);
         bubble.appendChild(time);
+
+        bubble.addEventListener('click', () => setReplyTarget(msg));
+
         messagesEl.appendChild(bubble);
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }
@@ -73,26 +143,78 @@
         })
         .catch(() => {});
 
+    fetch('/api/presence')
+        .then(r => r.json())
+        .then(list => {
+            const other = list.find(p => p.username === otherUsername);
+            otherOnline = !!(other && other.online);
+            refreshOtherStatusFromPresence();
+        })
+        .catch(() => {});
+
     const socket = new SockJS('/ws');
     const stompClient = Stomp.over(socket);
     stompClient.debug = null;
 
     stompClient.connect({}, () => {
         statusLine.textContent = 'connected — messages send instantly';
+
         stompClient.subscribe('/topic/chat', frame => {
             renderMessage(JSON.parse(frame.body));
             statusLine.textContent = 'connected — messages send instantly';
         });
+
+        stompClient.subscribe('/topic/presence', frame => {
+            const update = JSON.parse(frame.body);
+            if (update.username !== otherUsername) return;
+            otherOnline = !!update.online;
+            refreshOtherStatusFromPresence();
+        });
+
+        stompClient.subscribe('/topic/typing', frame => {
+            const update = JSON.parse(frame.body);
+            if (update.username !== otherUsername) return;
+            if (typingTimeoutHandle) {
+                clearTimeout(typingTimeoutHandle);
+                typingTimeoutHandle = null;
+            }
+            if (update.typing) {
+                setOtherStatus(update.displayName + ' is typing…', true);
+                typingTimeoutHandle = setTimeout(refreshOtherStatusFromPresence, 3000);
+            } else {
+                refreshOtherStatusFromPresence();
+            }
+        });
     }, () => {
         statusLine.textContent = 'connection lost — refresh to reconnect';
+    });
+
+    let lastTypingSent = 0;
+    let stopTypingHandle = null;
+    input.addEventListener('input', () => {
+        const now = Date.now();
+        if (now - lastTypingSent > 1500) {
+            stompClient.send('/app/chat.typing', {}, JSON.stringify({typing: true}));
+            lastTypingSent = now;
+        }
+        if (stopTypingHandle) clearTimeout(stopTypingHandle);
+        stopTypingHandle = setTimeout(() => {
+            stompClient.send('/app/chat.typing', {}, JSON.stringify({typing: false}));
+            lastTypingSent = 0;
+        }, 2000);
     });
 
     form.addEventListener('submit', e => {
         e.preventDefault();
         const text = input.value.trim();
         if (!text) return;
-        stompClient.send('/app/chat.send', {}, JSON.stringify({content: text}));
+        stompClient.send('/app/chat.send', {}, JSON.stringify({
+            content: text,
+            replyToId: replyingTo ? replyingTo.id : null
+        }));
         input.value = '';
+        setReplyTarget(null);
+        stompClient.send('/app/chat.typing', {}, JSON.stringify({typing: false}));
     });
 </script>
 </body>

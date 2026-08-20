@@ -29,7 +29,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/favicon.ico", "/api/status", "/ws/**").permitAll()
+                        .requestMatchers("/", "/login", "/css/**", "/js/**", "/img/**", "/favicon.ico", "/api/status", "/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -40,7 +40,7 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .addLogoutHandler(logoutHandler)
-                        .logoutSuccessUrl("/login?loggedout")
+                        .logoutSuccessUrl("/login")
                         .permitAll()
                 )
                 // Chat runs over SockJS/STOMP with its own message-level checks; the

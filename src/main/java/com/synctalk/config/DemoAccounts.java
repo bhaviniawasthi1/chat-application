@@ -13,12 +13,12 @@ public final class DemoAccounts {
     private DemoAccounts() {
     }
 
-    public record Account(String username, String rawPassword, String displayName, String avatarEmoji) {
+    public record Account(String username, String rawPassword, String displayName, String initials, String avatarUrl) {
     }
 
     public static final List<Account> ALL = List.of(
-            new Account("ada", "ada123", "Ada", "👩‍💻"),
-            new Account("turing", "turing123", "Turing", "👨‍💻")
+            new Account("john", "john123", "John", "J", "/img/avatar-john.svg"),
+            new Account("emily", "emily123", "Emily", "E", "/img/avatar-emily.svg")
     );
 
     public static Optional<Account> byUsername(String username) {
