@@ -13,12 +13,15 @@
         <h2>Take your seat</h2>
 
         <div class="msg error" th:if="${param.error}">
-            That account is either taken right now or the password's off — check the demo credentials on the
-            landing page and try again.
+            That persona just got claimed by someone else, or the password's off — head back and grab whichever
+            one is free.
         </div>
         <div class="msg info" th:if="${param.loggedout}">
-            You've left the chat — your seat is free for the next person.
+            You've left the chat — that persona is free again.
         </div>
+
+        <p style="color:var(--muted); font-size:0.9rem; margin-top:-8px;">Credentials are pre-filled — just hit
+            log in.</p>
 
         <form th:action="@{/login}" method="post">
             <div class="field">
@@ -27,12 +30,12 @@
             </div>
             <div class="field">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" autocomplete="current-password" required>
+                <input type="password" id="password" name="password" th:value="${prefillPass}" autocomplete="current-password" required>
             </div>
             <button type="submit" class="btn btn-primary" style="width:100%;">Log in</button>
         </form>
 
-        <a class="back-link" th:href="@{/}">&larr; back to demo accounts</a>
+        <a class="back-link" th:href="@{/}">&larr; back to persona picker</a>
     </div>
 </div>
 </body>

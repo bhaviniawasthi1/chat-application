@@ -1,22 +1,27 @@
 package com.synctalk.config;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Exactly two shared demo accounts. This is a portfolio project, not a
- * real messenger — anyone can grab one of these two seats, chat with
- * whoever is holding the other one, then log out to free it up.
+ * Two shared demo personas so visitors can try the real-time chat without
+ * a signup flow. Anyone can grab a persona, chat with whoever's holding
+ * the other one, then log out to free it up for the next pair.
  */
 public final class DemoAccounts {
 
     private DemoAccounts() {
     }
 
-    public record Account(String username, String rawPassword, String displayName) {
+    public record Account(String username, String rawPassword, String displayName, String avatarEmoji) {
     }
 
     public static final List<Account> ALL = List.of(
-            new Account("alex", "alex123", "Alex"),
-            new Account("sam", "sam123", "Sam")
+            new Account("ada", "ada123", "Ada", "👩‍💻"),
+            new Account("turing", "turing123", "Turing", "👨‍💻")
     );
+
+    public static Optional<Account> byUsername(String username) {
+        return ALL.stream().filter(a -> a.username().equals(username)).findFirst();
+    }
 }

@@ -1,13 +1,14 @@
 # SyncTalk
 
-A real-time, two-seat chat demo. There are exactly two accounts, ever — grab
-one, send the link to a friend, and have them grab the other. Log out and
-your seat opens up for the next pair of visitors.
+A real-time chat app built to demo WebSocket messaging, live. No sign-up —
+pick a persona (Ada or Turing) on the landing page and you're straight into
+the conversation.
 
 ## Live demo
 
-Two accounts, `alex` / `sam` — credentials are shown right on the landing
-page. Pick one, share the link, and chat with whoever grabs the other seat.
+Two personas, `ada` / `turing` — one click on the landing page logs you
+straight in with credentials pre-filled. Open a second tab (or send the link
+to a friend) to grab the other one and chat in real time.
 
 ## Tech Stack
 
@@ -25,15 +26,15 @@ page. Pick one, share the link, and chat with whoever grabs the other seat.
 This is a portfolio project, not a product — there's no real user data to
 protect, so keeping a persistent database around would just be overhead.
 `spring.jpa.hibernate.ddl-auto=create` rebuilds the schema from scratch on
-every boot, and a `DataInitializer` reseeds the two demo accounts and wipes
+every boot, and a `DataInitializer` reseeds the two demo personas and wipes
 chat history at the same time. Restarting the server (including Render's
 free-tier sleep/wake cycle) gives everyone a clean slate.
 
-## The "in use" seat lock
+## The seat lock
 
-Only two accounts exist, so only two people can ever be in the app at once.
-The moment someone logs into `alex` or `sam`, that account is marked in use
-and a third login attempt on it is rejected (via Spring Security's account
+Two personas exist so two people can be in the app at once. The moment
+someone logs into `ada` or `turing`, that persona is marked in use and a
+third login attempt on it is rejected (via Spring Security's account
 "locked" check) until the current occupant logs out, which frees the seat
 immediately.
 
@@ -47,7 +48,7 @@ mvn spring-boot:run
 ```
 
 Open `http://localhost:8080` in two separate browser windows (or one normal
-+ one incognito) to log in as both `alex` and `sam` and chat with yourself.
++ one incognito) to log in as both `ada` and `turing` and chat with yourself.
 
 ## Project structure
 

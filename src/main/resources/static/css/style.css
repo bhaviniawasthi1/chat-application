@@ -209,7 +209,7 @@ footer {
     border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-.chat-header .who { font-weight: 600; }
+.chat-header .who { font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .chat-header .who .muted { color: var(--muted); font-weight: 400; font-size: 0.85rem; }
 
 .logout-btn {
@@ -241,6 +241,7 @@ footer {
 }
 
 .bubble .sender { display: block; font-size: 0.72rem; color: var(--muted); margin-bottom: 3px; }
+.bubble .timestamp { display: block; font-size: 0.68rem; opacity: 0.7; margin-top: 4px; text-align: right; }
 
 .bubble.me {
     align-self: flex-end;

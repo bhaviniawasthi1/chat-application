@@ -3,47 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SyncTalk — a chat room built for two</title>
+    <title>SyncTalk — real-time chat, live demo</title>
     <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
 <body>
 <div class="wrap">
     <div class="brand"><span class="dot"></span> SyncTalk</div>
-    <p class="tagline">a portfolio project · real-time chat · exactly two seats</p>
+    <p class="tagline">a real-time chat app, built to try out live</p>
 
     <div class="hero">
-        <h1>Two seats. One conversation.<br>No third wheels allowed.</h1>
-        <p>This isn't a real messaging app with millions of users — it's a demo built to show off real-time chat,
-            done properly. There are only two accounts, ever. Grab one below, then send this page's link to a
-            friend and have them grab the other. Whoever's holding a seat when you show up will just have to wait.</p>
-    </div>
-
-    <div class="callout">
-        <strong>How it works:</strong> pick an account, log in, and start chatting. The moment you log out, your
-        seat opens back up for the next pair of visitors. It's first-come, first-served — so if both accounts
-        show "in use," someone's already mid-conversation. Circle back in a bit.
+        <h1>Pick a persona.<br>Start chatting instantly.</h1>
+        <p>I built this to get hands-on with real-time messaging — WebSockets, live delivery, the whole thing.
+            No sign-up, no forms: just pick Ada or Turing below and you're straight into the conversation.
+            Grab the other persona yourself in a second tab, or send this link to a friend so you're not talking
+            to yourself.</p>
     </div>
 
     <div class="accounts">
         <div class="account-card" th:each="account : ${accounts}">
-            <h3 th:text="${account.displayName}">Alex</h3>
+            <div style="font-size:2rem;" th:text="${account.avatarEmoji()}">🙂</div>
+            <h3 th:text="${account.displayName()}">Ada</h3>
             <span class="badge"
-                  th:classappend="${account.inUse} ? 'taken' : 'available'"
-                  th:text="${account.inUse} ? 'In use — try again soon' : 'Available'">Available</span>
-            <div class="creds">
-                <span th:text="'username: ' + ${account.username}">username: alex</span>
-            </div>
+                  th:classappend="${account.inUse()} ? 'taken' : 'available'"
+                  th:text="${account.inUse()} ? 'Already chatting' : 'Free to grab'">Free to grab</span>
             <a class="btn"
-               th:classappend="${account.inUse} ? 'btn-disabled' : 'btn-primary'"
-               th:href="@{/login(user=${account.username})}"
-               th:text="${account.inUse} ? 'Seat taken' : 'Log in as ' + ${account.displayName}">Log in</a>
+               th:classappend="${account.inUse()} ? 'btn-disabled' : 'btn-primary'"
+               th:href="@{/login(user=${account.username()},pass=${account.rawPassword()})}"
+               th:text="${account.inUse()} ? 'Taken for now' : 'Enter as ' + ${account.displayName()}">Enter</a>
         </div>
     </div>
 
-    <footer>&copy; 2026 SyncTalk. A two-person chat demo — nothing here is saved for long.</footer>
+    <footer>&copy; 2026 SyncTalk. A small demo — nothing typed here sticks around for long.</footer>
 </div>
 
-<script th:inline="javascript">
+<script>
     // Lightweight polling so seat availability updates without a manual refresh.
     async function refreshStatus() {
         try {
@@ -54,12 +47,12 @@
                 if (!account) return;
                 const badge = card.querySelector('.badge');
                 const btn = card.querySelector('.btn');
-                badge.textContent = account.inUse ? 'In use — try again soon' : 'Available';
+                badge.textContent = account.inUse ? 'Already chatting' : 'Free to grab';
                 badge.classList.toggle('taken', account.inUse);
                 badge.classList.toggle('available', !account.inUse);
                 btn.classList.toggle('btn-disabled', account.inUse);
                 btn.classList.toggle('btn-primary', !account.inUse);
-                btn.textContent = account.inUse ? 'Seat taken' : ('Log in as ' + account.displayName);
+                btn.textContent = account.inUse ? 'Taken for now' : ('Enter as ' + account.displayName);
                 if (account.inUse) {
                     btn.removeAttribute('href');
                 }

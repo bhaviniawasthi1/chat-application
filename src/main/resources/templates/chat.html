@@ -10,11 +10,12 @@
 <div class="chat-shell">
     <div class="chat-header">
         <div class="who">
-            <span th:text="${displayName}">Alex</span>
-            <span class="muted">is in the room</span>
+            <span th:text="${myAvatar}">🙂</span>
+            <span th:text="${displayName}">Ada</span>
+            <span class="muted" th:text="'chatting with ' + ${otherAvatar} + ' ' + ${otherName}">chatting with Turing</span>
         </div>
         <form th:action="@{/logout}" method="post">
-            <button type="submit" class="logout-btn">Log out &amp; free seat</button>
+            <button type="submit" class="logout-btn">Log out</button>
         </form>
     </div>
 
@@ -30,11 +31,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script th:inline="javascript">
-    const me = /*[[${username}]]*/ 'alex';
+    const me = /*[[${username}]]*/ 'ada';
     const messagesEl = document.getElementById('messages');
     const statusLine = document.getElementById('statusLine');
     const form = document.getElementById('composerForm');
     const input = document.getElementById('messageInput');
+
+    function formatTime(iso) {
+        try {
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return '';
+            return d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+        } catch (e) { return ''; }
+    }
 
     function renderMessage(msg) {
         const bubble = document.createElement('div');
@@ -44,15 +53,24 @@
         senderLabel.textContent = msg.senderDisplayName;
         const content = document.createElement('div');
         content.textContent = msg.content;
+        const time = document.createElement('span');
+        time.className = 'timestamp';
+        time.textContent = formatTime(msg.timestamp);
         bubble.appendChild(senderLabel);
         bubble.appendChild(content);
+        bubble.appendChild(time);
         messagesEl.appendChild(bubble);
         messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
     fetch('/api/messages')
         .then(r => r.json())
-        .then(history => history.forEach(renderMessage))
+        .then(history => {
+            if (history.length === 0) {
+                statusLine.textContent = "no one's replied yet — send the first message";
+            }
+            history.forEach(renderMessage);
+        })
         .catch(() => {});
 
     const socket = new SockJS('/ws');
@@ -63,6 +81,7 @@
         statusLine.textContent = 'connected — messages send instantly';
         stompClient.subscribe('/topic/chat', frame => {
             renderMessage(JSON.parse(frame.body));
+            statusLine.textContent = 'connected — messages send instantly';
         });
     }, () => {
         statusLine.textContent = 'connection lost — refresh to reconnect';
